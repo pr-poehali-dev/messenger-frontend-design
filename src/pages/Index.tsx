@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import Icon from '@/components/ui/icon';
 
 interface Chat {
@@ -43,10 +44,12 @@ const mockMessages: Message[] = [
 
 function Index() {
   const [activeChat, setActiveChat] = useState<Chat>(mockChats[0]);
-  const [messages] = useState<Message[]>(mockMessages);
+  const [messages, setMessages] = useState<Message[]>(mockMessages);
   const [messageText, setMessageText] = useState('');
   const [isMobileChat, setIsMobileChat] = useState(false);
   const [activeTab, setActiveTab] = useState<'chats' | 'calls' | 'conferences' | 'settings'>('chats');
+  const [callDialogOpen, setCallDialogOpen] = useState(false);
+  const [callType, setCallType] = useState<'audio' | 'video' | 'conference'>('audio');
 
   const handleChatClick = (chat: Chat) => {
     setActiveChat(chat);
@@ -57,9 +60,27 @@ function Index() {
     setIsMobileChat(false);
   };
 
+  const handleSendMessage = () => {
+    if (messageText.trim()) {
+      const newMessage: Message = {
+        id: messages.length + 1,
+        text: messageText,
+        time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+        isMine: true
+      };
+      setMessages([...messages, newMessage]);
+      setMessageText('');
+    }
+  };
+
+  const handleCall = (type: 'audio' | 'video' | 'conference') => {
+    setCallType(type);
+    setCallDialogOpen(true);
+  };
+
   return (
     <div className="flex h-screen overflow-hidden bg-background messenger-bg">
-      <div className={`w-full md:w-[30%] flex flex-col border-r border-border bg-card ${isMobileChat ? 'hidden md:flex' : 'flex'}`}>
+      <div className={`w-full md:w-[30%] flex flex-col border-r border-border glass ${isMobileChat ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
@@ -136,7 +157,10 @@ function Index() {
           <Button
             variant={activeTab === 'conferences' ? 'default' : 'ghost'}
             size="sm"
-            onClick={() => setActiveTab('conferences')}
+            onClick={() => {
+              setActiveTab('conferences');
+              handleCall('conference');
+            }}
             className="flex-1"
           >
             <Icon name="Video" size={18} />
@@ -153,7 +177,7 @@ function Index() {
       </div>
 
       <div className={`flex-1 flex flex-col ${isMobileChat ? 'flex' : 'hidden md:flex'}`}>
-        <div className="p-4 border-b border-border flex items-center justify-between bg-card">
+        <div className="p-4 border-b border-border flex items-center justify-between glass-light">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
@@ -172,10 +196,10 @@ function Index() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={() => handleCall('audio')}>
               <Icon name="Phone" size={20} />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={() => handleCall('video')}>
               <Icon name="Video" size={20} />
             </Button>
             <Button variant="ghost" size="icon">
@@ -216,7 +240,7 @@ function Index() {
           </div>
         </ScrollArea>
 
-        <div className="p-4 border-t border-border bg-card">
+        <div className="p-4 border-t border-border glass-light">
           <div className="flex items-center gap-2 max-w-4xl mx-auto">
             <Button variant="ghost" size="icon">
               <Icon name="Smile" size={20} />
@@ -225,6 +249,7 @@ function Index() {
               placeholder="Сообщение"
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               className="flex-1"
             />
             <Button variant="ghost" size="icon">
@@ -236,12 +261,61 @@ function Index() {
             <Button variant="ghost" size="icon">
               <Icon name="Mic" size={20} />
             </Button>
-            <Button size="icon" className="bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button size="icon" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSendMessage}>
               <Icon name="Send" size={20} />
             </Button>
           </div>
         </div>
       </div>
+
+      <Dialog open={callDialogOpen} onOpenChange={setCallDialogOpen}>
+        <DialogContent className="glass">
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl">
+              {callType === 'audio' && 'Аудио звонок'}
+              {callType === 'video' && 'Видео звонок'}
+              {callType === 'conference' && 'Создание конференции'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-6 py-8">
+            <Avatar className="h-24 w-24">
+              <AvatarFallback className="bg-muted text-3xl">
+                {activeChat.name.split(' ').map(n => n[0]).join('')}
+              </AvatarFallback>
+            </Avatar>
+            <div className="text-center">
+              <h3 className="text-lg font-medium">{activeChat.name}</h3>
+              <p className="text-sm text-muted-foreground mt-1">Звоним...</p>
+            </div>
+            <div className="flex gap-4">
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full w-16 h-16"
+                onClick={() => setCallDialogOpen(false)}
+              >
+                <Icon name="PhoneOff" size={24} className="text-destructive" />
+              </Button>
+              {callType === 'video' && (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="rounded-full w-16 h-16"
+                >
+                  <Icon name="VideoOff" size={24} />
+                </Button>
+              )}
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full w-16 h-16"
+              >
+                <Icon name="Mic" size={24} />
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
