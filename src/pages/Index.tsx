@@ -81,7 +81,7 @@ function Index() {
   return (
     <div className="flex h-screen overflow-hidden bg-background messenger-bg">
       <div className={`w-full md:w-[30%] flex flex-col border-r border-border glass ${isMobileChat ? 'hidden md:flex' : 'flex'}`}>
-        <div className="p-4 border-b border-border flex items-center justify-between">
+        <div className="p-4 border-b border-border flex items-center justify-between glass-light">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
               <AvatarFallback className="bg-primary text-primary-foreground">МП</AvatarFallback>
@@ -93,14 +93,14 @@ function Index() {
           </Button>
         </div>
 
-        <div className="p-3">
+        <div className="p-3 md:block hidden">
           <div className="relative">
             <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Поиск" className="pl-10" />
+            <Input placeholder="Поиск" className="pl-10 glass-light border-0" />
           </div>
         </div>
 
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 md:flex-1 flex-[1_1_0%] min-h-0">
           <div className="p-2">
             {mockChats.map((chat) => (
               <div
@@ -112,7 +112,7 @@ function Index() {
               >
                 <div className="relative">
                   <Avatar className="h-12 w-12">
-                    <AvatarFallback className="bg-muted">{chat.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    <AvatarFallback className="glass-light border border-border">{chat.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                   </Avatar>
                   {chat.online && (
                     <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-card" />
@@ -137,7 +137,14 @@ function Index() {
           </div>
         </ScrollArea>
 
-        <div className="p-2 border-t border-border flex justify-around">
+        <div className="p-3 md:hidden block">
+          <div className="relative">
+            <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input placeholder="Поиск" className="pl-10 glass-light border-0" />
+          </div>
+        </div>
+
+        <div className="p-2 border-t border-border flex justify-around glass-light">
           <Button
             variant={activeTab === 'chats' ? 'default' : 'ghost'}
             size="sm"
@@ -188,7 +195,7 @@ function Index() {
               <Icon name="ArrowLeft" size={20} />
             </Button>
             <Avatar className="h-10 w-10">
-              <AvatarFallback className="bg-muted">{activeChat.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+              <AvatarFallback className="glass-light border border-border">{activeChat.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
             </Avatar>
             <div>
               <div className="font-medium">{activeChat.name}</div>
@@ -213,7 +220,7 @@ function Index() {
 
         <ScrollArea className="flex-1 p-4">
           <div className="sticky top-0 flex justify-center mb-4">
-            <div className="bg-muted px-3 py-1 rounded-full text-xs text-muted-foreground">
+            <div className="glass-light px-3 py-1 rounded-full text-xs text-muted-foreground">
               Сегодня
             </div>
           </div>
@@ -227,7 +234,7 @@ function Index() {
                   className={`max-w-[70%] rounded-2xl px-4 py-2 ${
                     msg.isMine
                       ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-foreground'
+                      : 'glass-light text-foreground border border-border'
                   }`}
                 >
                   <p className="text-sm">{msg.text}</p>
@@ -250,7 +257,7 @@ function Index() {
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-              className="flex-1"
+              className="flex-1 glass-light border-0"
             />
             <Button variant="ghost" size="icon">
               <Icon name="Paperclip" size={20} />
